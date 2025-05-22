@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Monitor App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="role-selection">
+      <h1>اختر وضع التشغيل</h1>
+      <button onclick="selectRole('camera')">📷 جهاز كاميرا</button>
+      <button onclick="selectRole('viewer')">👁️ جهاز مشاهدة</button>
+    </div>
+
+    <div id="camera-section" class="hidden">
+      <h2>📷 البث المباشر</h2>
+      <video id="localVideo" autoplay muted playsinline></video>
+      <p>رمز الاقتران: <span id="pairCode"></span></p>
+    </div>
+
+    <div id="viewer-section" class="hidden">
+      <h2>👁️ مشاهدة البث</h2>
+      <input type="text" id="joinCode" placeholder="ادخل رمز الاقتران" />
+      <button onclick="connectToCamera()">اتصال</button>
+      <video id="remoteVideo" autoplay playsinline></video>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
