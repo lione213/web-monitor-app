@@ -10,7 +10,7 @@ app.use(express.static('public'));
 
 const peers = {};
 
-io.on('connection', (socket) => {
+io.on('connection', socket => {
   console.log('New connection:', socket.id);
 
   socket.on('create-pair', () => {
@@ -19,7 +19,7 @@ io.on('connection', (socket) => {
     socket.emit('pair-created', code);
   });
 
-  socket.on('join-pair', (code) => {
+  socket.on('join-pair', code => {
     const peerId = peers[code];
     if (peerId) {
       socket.to(peerId).emit('viewer-joined', socket.id);
