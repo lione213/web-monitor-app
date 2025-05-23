@@ -1,77 +1,99 @@
 const socket = io();
 let localStream;
 let peerConnection;
+let remotePeerId = null;
 const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-function selectRole(role) {
-  document.getElementById('role-selection').classList.add('hidden');
-  if (role === 'camera') {
-    document.getElementById('camera-section').classList.remove('hidden');
-    startCamera();
-  } else {
-    document.getElementById('viewer-section').classList.remove('hidden');
-  }
-}
+// العناصر
+const btnCam    = document.getElementById('btn-camera');
+const btnView   = document.getElementById('btn-viewer');
+const btnCon    = document.getElementById('btn-connect');
+const selRole   = document.getElementById('role-selection');
+const camSec    = document.getElementById('camera-section');
+const viewSec   = document.getElementById('viewer-section');
+const pairCode  = document.getElementById('pairCode');
+const joinCode  = document.getElementById('joinCode');
+const localVid  = document.getElementById('localVideo');
+const remoteVid = document.getElementById('remoteVideo');
 
+// اختيار الدور
+btnCam.onclick = () => {
+  selRole.classList.add('hidden');
+  camSec.classList.remove('hidden');
+  startCamera();
+};
+btnView.onclick = () => {
+  selRole.classList.add('hidden');
+  viewSec.classList.remove('hidden');
+};
+
+// بدء كاميرا البث
 function startCamera() {
-  navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
-    localStream = stream;
-    document.getElementById('localVideo').srcObject = stream;
+  navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+      localStream = stream;
+      localVid.srcObject = stream;
 
-    socket.emit('create-pair');
-    socket.on('pair-created', code => {
-      document.getElementById('pairCode').textContent = code;
-    });
+      socket.emit('create-pair');
+      socket.on('pair-created', code => pairCode.textContent = code);
 
-    socket.on('viewer-joined', viewerId => {
-      peerConnection = new RTCPeerConnection(config);
-      localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+      socket.on('viewer-joined', viewerId => {
+        remotePeerId = viewerId;
+        peerConnection = new RTCPeerConnection(config);
+        localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
 
-      peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-          socket.emit('signal', { to: viewerId, data: { candidate: event.candidate } });
-        }
-      };
+        peerConnection.onicecandidate = e => {
+          if (e.candidate && remotePeerId) {
+            socket.emit('signal', { to: remotePeerId, data: { candidate: e.candidate } });
+          }
+        };
 
-      peerConnection.createOffer().then(offer => {
-        peerConnection.setLocalDescription(offer);
-        socket.emit('signal', { to: viewerId, data: { sdp: offer } });
+        peerConnection.createOffer()
+          .then(offer => {
+            peerConnection.setLocalDescription(offer);
+            socket.emit('signal', { to: remotePeerId, data: { sdp: offer } });
+          });
       });
-    });
 
-    socket.on('signal', async ({ from, data }) => {
-      if (data.candidate) {
-        peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-      } else if (data.sdp) {
-        peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
-      }
-    });
-  });
+      socket.on('signal', async ({ from, data }) => {
+        if (data.candidate) {
+          await peerConnection.addIceCandidate(data.candidate);
+        } else if (data.sdp) {
+          await peerConnection.setRemoteDescription(data.sdp);
+        }
+      });
+    })
+    .catch(console.error);
 }
 
-function connectToCamera() {
-  const code = document.getElementById('joinCode').value;
+// بدء جهاز المشاهدة
+btnCon.onclick = () => {
+  const code = joinCode.value.trim();
+  if (!code) return alert('ادخل رمز الاقتران');
   socket.emit('join-pair', code);
 
-  peerConnection = new RTCPeerConnection(config);
-  peerConnection.ontrack = event => {
-    document.getElementById('remoteVideo').srcObject = event.streams[0];
-  };
+  socket.on('viewer-joined', camId => {
+    // (هذا حدث اختياري إذا أردت إعلام المرسل)
+  });
 
-  peerConnection.onicecandidate = event => {
-    if (event.candidate) {
-      socket.emit('signal', { to: null, data: { candidate: event.candidate } });
+  peerConnection = new RTCPeerConnection(config);
+  peerConnection.ontrack = e => remoteVid.srcObject = e.streams[0];
+
+  peerConnection.onicecandidate = e => {
+    if (e.candidate && remotePeerId) {
+      socket.emit('signal', { to: remotePeerId, data: { candidate: e.candidate } });
     }
   };
 
   socket.on('signal', async ({ from, data }) => {
     if (data.sdp) {
-      await peerConnection.setRemoteDescription(new RTCSessionDescription(data.sdp));
+      remotePeerId = from;
+      await peerConnection.setRemoteDescription(data.sdp);
       const answer = await peerConnection.createAnswer();
       await peerConnection.setLocalDescription(answer);
-      socket.emit('signal', { to: from, data: { sdp: answer } });
+      socket.emit('signal', { to: remotePeerId, data: { sdp: answer } });
     } else if (data.candidate) {
-      await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+      await peerConnection.addIceCandidate(data.candidate);
     }
   });
-}
+};
