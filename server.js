@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const { v4: uuidv4 } = require('uuid');
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
@@ -20,16 +21,21 @@ io.on('connection', socket => {
   });
 
   socket.on('join-pair', code => {
-    const peerId = peers[code];
-    if (peerId) {
-      socket.to(peerId).emit('viewer-joined', socket.id);
+    const broadcasterId = peers[code];
+    if (broadcasterId) {
+      // أخطر البث بأن المشاهد انضم
+      socket.to(broadcasterId).emit('viewer-joined', socket.id);
+      // وأعلم المشاهد بمعرف البث
+      socket.emit('pair-accepted', broadcasterId);
     } else {
       socket.emit('error', 'Invalid pair code');
     }
   });
 
   socket.on('signal', ({ to, data }) => {
-    if (to) io.to(to).emit('signal', { from: socket.id, data });
+    if (to) {
+      io.to(to).emit('signal', { from: socket.id, data });
+    }
   });
 });
 
