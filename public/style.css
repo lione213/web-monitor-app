@@ -1,86 +1,70 @@
-/* إعادة تعريف التخطيط بثلاثة أعمدة */
-body {
+* {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+}
+body {
   font-family: Tahoma, Arial, sans-serif;
   background: #f5f7fa;
   color: #333;
-
-  display: grid;
-  grid-template-columns: 80px 1fr 80px;
-  grid-template-rows: auto 1fr auto;
-  height: 100vh;
-}
-
-/* جانبيات الإعلانات */
-.ad-left {
-  grid-column: 1;
-  grid-row: 1 / span 3;
-  background: #ddd;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  text-align: center;
-  padding: 10px;
-  font-size: 0.9rem;
-  color: #555;
-}
-.ad-right {
-  grid-column: 3;
-  grid-row: 1 / span 3;
-  background: #ddd;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  text-align: center;
-  padding: 10px;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-/* الحاوية الرئيسية في الوسط */
-.app-container {
-  grid-column: 2;
-  grid-row: 1 / span 3;
   display: flex;
-  flex-direction: column;
-  max-width: 100%;
-  padding: 20px;
-  overflow: auto;
 }
-
-/* Header ولغة */
+.app-container {
+  flex: 1;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+}
+header h1 {
+  font-size: 2rem;
+}
+header p {
+  font-size: 1rem;
+  color: #666;
 }
 .lang-select {
-  align-self: flex-end;
+  text-align: right;
   margin-bottom: 10px;
 }
-
-/* أزرار الوضع */
-#role-selection {
-  text-align: center;
-  margin-bottom: 15px;
+.lang-select select {
+  padding: 4px;
 }
-
-/* الفيديو */
+.role-btn {
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 1rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.role-btn:hover {
+  background: #0056b3;
+}
+.hidden {
+  display: none;
+}
 video {
   width: 100%;
-  height: auto;
   border-radius: 6px;
   background: #000;
   margin-bottom: 10px;
 }
-
-/* التحكمات */
 .controls, .view-controls {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+  margin: 10px 0;
+  text-align: center;
 }
 .controls button,
 .view-controls button {
-  margin: 5px;
+  margin: 0 5px;
   padding: 8px 12px;
   border: none;
   border-radius: 4px;
@@ -92,12 +76,10 @@ video {
 .view-controls button:hover {
   background: #218838;
 }
-
-/* مدخلات الرمز وحالة الاتصال */
 .pair-info, .pair-input {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin: 10px 0;
 }
 .pair-info input,
 .pair-input input {
@@ -112,39 +94,31 @@ video {
   font-size: 0.9rem;
   color: #555;
 }
-
-/* سجلات الأحداث */
 #log-section, #view-log-section {
-  flex: 1;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 #log-section pre,
 #view-log-section pre {
-  width: 100%;
-  height: 100%;
+  height: 120px;
   background: #f0f0f0;
   padding: 10px;
   overflow-y: auto;
   border-radius: 4px;
   font-size: 0.85rem;
 }
-
-/* أزرار الواجهة العامة */
-.role-btn {
-  padding: 10px 20px;
-  margin: 0 10px 10px;
-  font-size: 1rem;
-  background: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.ad {
+  width: 80px;
+  background: #ddd;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.9rem;
+  color: #555;
 }
-.role-btn:hover {
-  background: #0056b3;
+.ad-left {
+  margin-right: 10px;
 }
-
-/* إخفاء المكونات */
-.hidden {
-  display: none !important;
+.ad-right {
+  margin-left: 10px;
 }
