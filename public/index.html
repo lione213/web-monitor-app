@@ -1,29 +1,91 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <!-- ... -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Monitor App v1.0</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <!-- ... قسم الاختيار والـ video sections ... -->
+  <!-- إعلانات جانبية -->
+  <aside class="ad ad-left">إعلان</aside>
+  <aside class="ad ad-right">إعلان</aside>
 
-    <!-- أدوات التحكم تظهر فقط في كاميرا البث -->
-    <section id="controls-section" class="hidden">
-      <button id="btn-zoom-in">🔍 زوم +</button>
-      <button id="btn-zoom-out">🔍 زوم -</button>
-      <button id="btn-record">⏺️ تسجيل</button>
-      <button id="btn-stop-record" class="hidden">⏹️ إيقاف التسجيل</button>
-      <a id="downloadLink" class="hidden" download="record.webm">⬇️ تحميل التسجيل</a>
+  <div class="app-container">
+    <!-- اختيار اللغة -->
+    <div class="lang-select">
+      <label for="lang">Language:</label>
+      <select id="lang">
+        <option value="ar">العربية</option>
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+
+    <!-- اسم ونسخة التطبيق -->
+    <header>
+      <h1 id="app-name">Web Monitor App</h1>
+      <p id="app-version">الإصدار 1.0</p>
+    </header>
+
+    <!-- اختيار الوضع -->
+    <section id="role-selection">
+      <button id="btn-broadcast" class="role-btn">وضع البث</button>
+      <button id="btn-view"      class="role-btn">وضع المشاهدة</button>
     </section>
 
-    <!-- منطقة السجل -->
-    <section id="log-section">
-      <h3>السجل</h3>
-      <pre id="log"></pre>
+    <!-- وضع البث -->
+    <section id="broadcast-section" class="hidden">
+      <h2>عرض البث</h2>
+      <video id="localVideo" autoplay muted playsinline></video>
+      <div class="controls">
+        <button id="btn-start-broadcast">▶️ بدء البث</button>
+        <button id="btn-stop-broadcast" class="hidden">⏹️ قطع البث</button>
+        <button id="btn-switch-cam">📷 تبديل الكاميرا</button>
+      </div>
+      <div class="pair-info">
+        <input id="pairCode" readonly placeholder="رمز الاقتران" />
+        <div id="conn-status">حالة الاتصال: —</div>
+      </div>
+      <section id="log-section">
+        <h3>سجل الأحداث</h3>
+        <pre id="log"></pre>
+      </section>
+    </section>
+
+    <!-- وضع المشاهدة -->
+    <section id="view-section" class="hidden">
+      <h2>مشاهدة البث</h2>
+      <div class="pair-input">
+        <input id="joinCode" placeholder="أدخل رمز البث" />
+        <button id="btn-start-view">▶️ بدء المشاهدة</button>
+      </div>
+      <video id="remoteVideo" autoplay playsinline></video>
+      <div class="view-controls">
+        <button id="btn-zoom-in">🔍+</button>
+        <button id="btn-zoom-out">🔍−</button>
+        <button id="btn-mute">🔇/🔊</button>
+        <button id="btn-record-stream">⏺️ تسجيل البث</button>
+        <button id="btn-stop-view">⏹️ قطع المشاهدة</button>
+      </div>
+      <div id="view-status">حالة الاتصال: —</div>
+      <section id="view-log-section">
+        <h3>سجل المشاهدة</h3>
+        <pre id="view-log"></pre>
+      </section>
     </section>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="main.js"></script>
+  <script>
+    // كشف مانع الإعلانات
+    window.addEventListener('load', () => {
+      const ad = document.querySelector('.ad-left');
+      if (getComputedStyle(ad).display === 'none') {
+        alert('يرجى تعطيل مانع الإعلانات للاستفادة من التطبيق الكامل');
+      }
+    });
+  </script>
 </body>
 </html>
