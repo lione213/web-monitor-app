@@ -1,21 +1,124 @@
-/* إضافة بعد بقية القواعد */
-
-#controls-section {
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: Tahoma, Arial, sans-serif;
+  background: #f5f7fa;
+  color: #333;
+  display: flex;
+}
+.app-container {
+  flex: 1;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+header h1 {
+  font-size: 2rem;
+}
+header p {
+  font-size: 1rem;
+  color: #666;
+}
+.lang-select {
+  text-align: right;
+  margin-bottom: 10px;
+}
+.lang-select select {
+  padding: 4px;
+}
+.role-btn {
+  padding: 10px 20px;
+  margin: 0 10px;
+  font-size: 1rem;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.role-btn:hover {
+  background: #0056b3;
+}
+.hidden {
+  display: none;
+}
+video {
+  width: 100%;
+  border-radius: 6px;
+  background: #000;
+  margin-bottom: 10px;
+}
+.controls, .view-controls {
+  margin: 10px 0;
+  text-align: center;
+}
+.controls button,
+.view-controls button {
+  margin: 0 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #28a745;
+  color: #fff;
+}
+.controls button:hover,
+.view-controls button:hover {
+  background: #218838;
+}
+.pair-info, .pair-input {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+.pair-info input,
+.pair-input input {
+  flex: 1;
+  padding: 8px;
+  font-size: 1rem;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+#conn-status, #view-status {
+  font-size: 0.9rem;
+  color: #555;
+}
+#log-section, #view-log-section {
   margin-top: 15px;
 }
-
-#controls-section button,
-#controls-section a {
-  margin: 5px;
-}
-
-#log-section {
-  margin-top: 20px;
-  background: #f7f7f7;
+#log-section pre,
+#view-log-section pre {
+  height: 120px;
+  background: #f0f0f0;
   padding: 10px;
-  border-radius: 4px;
-  height: 150px;
   overflow-y: auto;
-  text-align: left;
-  font-size: 14px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.ad {
+  width: 80px;
+  background: #ddd;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.9rem;
+  color: #555;
+}
+.ad-left {
+  margin-right: 10px;
+}
+.ad-right {
+  margin-left: 10px;
 }
