@@ -1,33 +1,25 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Web Monitor App</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- ... -->
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Web Monitor App</h1>
-    </header>
+    <!-- ... قسم الاختيار والـ video sections ... -->
 
-    <section id="role-selection">
-      <button id="btn-camera">📷 جهاز كاميرا</button>
-      <button id="btn-viewer">👁️ جهاز مشاهدة</button>
+    <!-- أدوات التحكم تظهر فقط في كاميرا البث -->
+    <section id="controls-section" class="hidden">
+      <button id="btn-zoom-in">🔍 زوم +</button>
+      <button id="btn-zoom-out">🔍 زوم -</button>
+      <button id="btn-record">⏺️ تسجيل</button>
+      <button id="btn-stop-record" class="hidden">⏹️ إيقاف التسجيل</button>
+      <a id="downloadLink" class="hidden" download="record.webm">⬇️ تحميل التسجيل</a>
     </section>
 
-    <section id="camera-section" class="hidden">
-      <h2>📷 بث مباشر</h2>
-      <video id="localVideo" autoplay muted playsinline></video>
-      <p>رمز الاقتران: <span id="pairCode">—</span></p>
-    </section>
-
-    <section id="viewer-section" class="hidden">
-      <h2>👁️ مشاهدة البث</h2>
-      <input type="text" id="joinCode" placeholder="ادخل رمز الاقتران" />
-      <button id="btn-connect">اتصال</button>
-      <video id="remoteVideo" autoplay playsinline></video>
+    <!-- منطقة السجل -->
+    <section id="log-section">
+      <h3>السجل</h3>
+      <pre id="log"></pre>
     </section>
   </div>
 
