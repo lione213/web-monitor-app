@@ -7,10 +7,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- إعلانات جانبية -->
-  <aside class="ad ad-left">إعلان</aside>
-  <aside class="ad ad-right">إعلان</aside>
-
   <div class="app-container">
     <!-- اختيار اللغة -->
     <div class="lang-select">
@@ -36,41 +32,44 @@
 
     <!-- وضع البث -->
     <section id="broadcast-section" class="hidden">
-      <h2>عرض البث</h2>
-      <video id="localVideo" autoplay muted playsinline></video>
+      <h2 data-i18n="broadcast_title">عرض البث</h2>
+      <div class="video-wrapper">
+        <video id="localVideo" autoplay muted playsinline></video>
+      </div>
       <div class="controls">
-        <button id="btn-start-broadcast">▶️ بدء البث</button>
-        <button id="btn-stop-broadcast" class="hidden">⏹️ قطع البث</button>
-        <button id="btn-switch-cam">📷 تبديل الكاميرا</button>
+        <button id="btn-start-broadcast">▶️ <span data-i18n="start_broadcast">بدء البث</span></button>
+        <button id="btn-stop-broadcast" class="hidden">⏹️ <span data-i18n="stop_broadcast">قطع البث</span></button>
+        <button id="btn-switch-cam">📷 <span data-i18n="switch_cam">تبديل الكاميرا</span></button>
       </div>
       <div class="pair-info">
         <input id="pairCode" readonly placeholder="رمز الاقتران" />
         <div id="conn-status">حالة الاتصال: —</div>
       </div>
       <section id="log-section">
-        <h3>سجل الأحداث</h3>
+        <h3 data-i18n="event_log">سجل الأحداث</h3>
         <pre id="log"></pre>
       </section>
     </section>
 
     <!-- وضع المشاهدة -->
     <section id="view-section" class="hidden">
-      <h2>مشاهدة البث</h2>
+      <h2 data-i18n="view_title">مشاهدة البث</h2>
       <div class="pair-input">
         <input id="joinCode" placeholder="أدخل رمز البث" />
-        <button id="btn-start-view">▶️ بدء المشاهدة</button>
+        <button id="btn-start-view">▶️ <span data-i18n="start_view">بدء المشاهدة</span></button>
       </div>
-      <video id="remoteVideo" autoplay playsinline></video>
+      <div class="video-wrapper">
+        <video id="remoteVideo" autoplay playsinline></video>
+      </div>
       <div class="view-controls">
-        <button id="btn-zoom-in">🔍+</button>
-        <button id="btn-zoom-out">🔍−</button>
-        <button id="btn-mute">🔇/🔊</button>
-        <button id="btn-record-stream">⏺️ تسجيل البث</button>
-        <button id="btn-stop-view">⏹️ قطع المشاهدة</button>
+        <button id="btn-zoom-in">🔍+ <span data-i18n="zoom_in"></span></button>
+        <button id="btn-zoom-out">🔍− <span data-i18n="zoom_out"></span></button>
+        <button id="btn-mute">🔇/🔊 <span data-i18n="mute_toggle"></span></button>
+        <!-- التسجيل بدون تغيير -->
       </div>
       <div id="view-status">حالة الاتصال: —</div>
       <section id="view-log-section">
-        <h3>سجل المشاهدة</h3>
+        <h3 data-i18n="view_log">سجل المشاهدة</h3>
         <pre id="view-log"></pre>
       </section>
     </section>
@@ -78,14 +77,5 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="main.js"></script>
-  <script>
-    // كشف مانع الإعلانات
-    window.addEventListener('load', () => {
-      const ad = document.querySelector('.ad-left');
-      if (getComputedStyle(ad).display === 'none') {
-        alert('يرجى تعطيل مانع الإعلانات للاستفادة من التطبيق الكامل');
-      }
-    });
-  </script>
 </body>
 </html>
