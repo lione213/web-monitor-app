@@ -3,93 +3,145 @@ let localStream, peerConnection, remotePeerId;
 let mediaRecorder, recordedChunks = [];
 const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-// العناصر
-const logEl      = document.getElementById('log');
-const controls   = document.getElementById('controls-section');
-const btnZoomIn  = document.getElementById('btn-zoom-in');
-const btnZoomOut = document.getElementById('btn-zoom-out');
-const btnRecord  = document.getElementById('btn-record');
-const btnStopRec = document.getElementById('btn-stop-record');
-const dlLink     = document.getElementById('downloadLink');
+// DOM elements
+const btnBroadcast    = document.getElementById('btn-broadcast');
+const btnViewMode     = document.getElementById('btn-view');
+const startBroadcast  = document.getElementById('btn-start-broadcast');
+const stopBroadcast   = document.getElementById('btn-stop-broadcast');
+const switchCam       = document.getElementById('btn-switch-cam');
+const pairCodeInput   = document.getElementById('pairCode');
+const connStatus      = document.getElementById('conn-status');
+const logEl           = document.getElementById('log');
 
-// دالة لإضافة سجل
-function log(msg) {
-  const time = new Date().toLocaleTimeString('ar-EG');
-  logEl.textContent += `[${time}] ${msg}\n`;
-  logEl.scrollTop = logEl.scrollHeight;
+const startView       = document.getElementById('btn-start-view');
+const joinCodeInput   = document.getElementById('joinCode');
+const remoteVideo     = document.getElementById('remoteVideo');
+const viewControls    = document.querySelector('.view-controls');
+const zoomIn          = document.getElementById('btn-zoom-in');
+const zoomOut         = document.getElementById('btn-zoom-out');
+const muteBtn         = document.getElementById('btn-mute');
+const recordStreamBtn = document.getElementById('btn-record-stream');
+const stopViewBtn     = document.getElementById('btn-stop-view');
+const viewStatus      = document.getElementById('view-status');
+const viewLogEl       = document.getElementById('view-log');
+
+// Helper to append logs
+function log(msg, view=false) {
+  const time = new Date().toLocaleTimeString();
+  const target = view ? viewLogEl : logEl;
+  target.textContent += `[${time}] ${msg}\n`;
+  target.scrollTop = target.scrollHeight;
 }
 
-// startCamera مع الكاميرا الخلفية
-function startCamera() {
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: { exact: "environment" } },
-    audio: true
-  })
-  .then(stream => {
-    localStream = stream;
-    document.getElementById('localVideo').srcObject = stream;
-    controls.classList.remove('hidden');  // إظهار أدوات التحكم
+// Switch UI
+btnBroadcast.onclick = () => {
+  document.getElementById('role-selection').classList.add('hidden');
+  document.getElementById('broadcast-section').classList.remove('hidden');
+};
+btnViewMode.onclick = () => {
+  document.getElementById('role-selection').classList.add('hidden');
+  document.getElementById('view-section').classList.remove('hidden');
+};
 
-    log('تم تشغيل الكاميرا الخلفية');
-    socket.emit('create-pair');
-    socket.on('pair-created', code => log('Pair code: ' + code));
+// Broadcast
+startBroadcast.onclick = () => {
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true })
+    .then(stream => {
+      localStream = stream;
+      document.getElementById('localVideo').srcObject = stream;
+      startBroadcast.classList.add('hidden');
+      stopBroadcast.classList.remove('hidden');
+      log('Camera stream started');
+      socket.emit('create-pair');
+      socket.on('pair-created', code => {
+        pairCodeInput.value = code;
+        log('Pair code: ' + code);
+      });
 
-    // إعداد WebRTC كما قبلاً...
-  })
-  .catch(err => {
-    log('خطأ في تشغيل الكاميرا: ' + err.message);
-    // جرب الكاميرا الأمامية كبديل:
-    return navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      socket.on('viewer-joined', viewerId => {
+        remotePeerId = viewerId;
+        peerConnection = new RTCPeerConnection(config);
+        localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+        peerConnection.onicecandidate = e => {
+          if (e.candidate) {
+            socket.emit('signal', { to: remotePeerId, data: { candidate: e.candidate } });
+            log('Sent ICE candidate');
+          }
+        };
+        peerConnection.createOffer().then(offer => {
+          peerConnection.setLocalDescription(offer);
+          socket.emit('signal', { to: remotePeerId, data: { sdp: offer } });
+          log('Offer sent');
+        });
+      });
+
+      socket.on('signal', async ({ from, data }) => {
+        log('Signal from ' + from);
+        if (data.candidate) await peerConnection.addIceCandidate(data.candidate);
+        else if (data.sdp) await peerConnection.setRemoteDescription(data.sdp);
+      });
+    })
+    .catch(err => log('Error: ' + err.message));
+};
+stopBroadcast.onclick = () => {
+  if (localStream) localStream.getTracks().forEach(t => t.stop());
+  stopBroadcast.classList.add('hidden');
+  startBroadcast.classList.remove('hidden');
+  log('Broadcast stopped');
+};
+switchCam.onclick = () => {
+  if (!localStream) return;
+  const track = localStream.getVideoTracks()[0];
+  const current = track.getSettings().facingMode || 'environment';
+  const newMode = current === 'environment' ? 'user' : 'environment';
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: newMode }, audio: true })
+    .then(stream => {
+      localStream = stream;
+      document.getElementById('localVideo').srcObject = stream;
+      log('Switched to ' + newMode + ' camera');
+    });
+};
+
+// View
+startView.onclick = () => {
+  const code = joinCodeInput.value.trim();
+  if (!code) return alert('أدخل رمز البث');
+  peerConnection = new RTCPeerConnection(config);
+  peerConnection.ontrack = e => {
+    remoteVideo.srcObject = e.streams[0];
+    log('Stream received', true);
+  };
+  peerConnection.onicecandidate = e => {
+    if (e.candidate && remotePeerId) {
+      socket.emit('signal', { to: remotePeerId, data: { candidate: e.candidate } });
+      log('Sent ICE candidate', true);
+    }
+  };
+  socket.emit('join-pair', code);
+  socket.on('signal', async ({ from, data }) => {
+    viewStatus.innerText = 'Connected';
+    remotePeerId = from;
+    if (data.sdp) {
+      await peerConnection.setRemoteDescription(data.sdp);
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      socket.emit('signal', { to: remotePeerId, data: { sdp: answer } });
+      log('Answer sent', true);
+    } else if (data.candidate) {
+      await peerConnection.addIceCandidate(data.candidate);
+      log('ICE candidate added', true);
+    }
   });
-}
-
-// وظائف الزوم
-async function changeZoom(delta) {
-  const [track] = localStream.getVideoTracks();
-  const capabilities = track.getCapabilities();
-  if (!capabilities.zoom) {
-    return log('الزوم غير مدعوم على هذه الكاميرا');
-  }
-  const settings = track.getSettings();
-  let newZoom = (settings.zoom || capabilities.zoom.min) + delta;
-  newZoom = Math.max(capabilities.zoom.min, Math.min(capabilities.zoom.max, newZoom));
-  await track.applyConstraints({ advanced: [{ zoom: newZoom }] });
-  log('الزوم تم إلى ' + newZoom.toFixed(1));
-}
-btnZoomIn.onclick  = () => changeZoom(1);
-btnZoomOut.onclick = () => changeZoom(-1);
-
-// تسجيل الفيديو
-btnRecord.onclick = () => {
-  mediaRecorder = new MediaRecorder(localStream);
-  recordedChunks = [];
-  mediaRecorder.ondataavailable = e => {
-    if (e.data.size > 0) recordedChunks.push(e.data);
-  };
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    dlLink.href = URL.createObjectURL(blob);
-    dlLink.classList.remove('hidden');
-    log('انتهى التسجيل، اضغط لتحميله');
-  };
-  mediaRecorder.start();
-  btnRecord.classList.add('hidden');
-  btnStopRec.classList.remove('hidden');
-  log('بدء التسجيل');
+  log('Join request sent', true);
 };
-btnStopRec.onclick = () => {
-  mediaRecorder.stop();
-  btnStopRec.classList.add('hidden');
-  btnRecord.classList.remove('hidden');
+stopViewBtn.onclick = () => {
+  if (remoteVideo.srcObject) remoteVideo.srcObject.getTracks().forEach(t => t.stop());
+  viewStatus.innerText = 'Disconnected';
+  log('View stopped', true);
 };
 
-// … أبقِ كود الاتصال عبر Socket.IO و WebRTC كما هو مع إضافة استدعاءات log()  
-// مثال:
-socket.on('viewer-joined', viewerId => {
-  log('المشاهد انضم: ' + viewerId);
-  // … بقية إعداد offer/answer
-});
-socket.on('signal', ({ from, data }) => {
-  log('وصلت إشارة من ' + from);
-  // … التعامل مع candidate أو sdp
-});
+// View controls (stubs)
+zoomIn.onclick  = () => log('Zoom in (not implemented)', true);
+zoomOut.onclick = () => log('Zoom out (not implemented)', true);
+muteBtn.onclick = () => log('Toggle mute (not implemented)', true);
+recordStreamBtn.onclick = () => log('Record stream (not implemented)', true);
