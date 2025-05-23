@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,25 +7,28 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <div id="role-selection">
-      <h1>اختر وضع التشغيل</h1>
-      <button onclick="selectRole('camera')">📷 جهاز كاميرا</button>
-      <button onclick="selectRole('viewer')">👁️ جهاز مشاهدة</button>
-    </div>
+  <div class="container">
+    <header>
+      <h1>Web Monitor App</h1>
+    </header>
 
-    <div id="camera-section" class="hidden">
-      <h2>📷 البث المباشر</h2>
+    <section id="role-selection">
+      <button id="btn-camera">📷 جهاز كاميرا</button>
+      <button id="btn-viewer">👁️ جهاز مشاهدة</button>
+    </section>
+
+    <section id="camera-section" class="hidden">
+      <h2>📷 بث مباشر</h2>
       <video id="localVideo" autoplay muted playsinline></video>
-      <p>رمز الاقتران: <span id="pairCode"></span></p>
-    </div>
+      <p>رمز الاقتران: <span id="pairCode">—</span></p>
+    </section>
 
-    <div id="viewer-section" class="hidden">
+    <section id="viewer-section" class="hidden">
       <h2>👁️ مشاهدة البث</h2>
       <input type="text" id="joinCode" placeholder="ادخل رمز الاقتران" />
-      <button onclick="connectToCamera()">اتصال</button>
+      <button id="btn-connect">اتصال</button>
       <video id="remoteVideo" autoplay playsinline></video>
-    </div>
+    </section>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
